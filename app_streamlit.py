@@ -5,9 +5,9 @@ def main():
     st.set_page_config(page_title="MGU Scraper")
     st.title("MGU Scraper")
 
-    start_prn = st.number_input("Enter Start PRN:", min_value=0)
-    end_prn = st.number_input("Enter End PRN:", min_value=0)
-    exam_id = st.number_input("Enter Exam ID:", min_value=0)
+    start_prn = st.number_input("Enter Start PRN:", min_value=0, value=None)
+    end_prn = st.number_input("Enter End PRN:", min_value=0, value=None)
+    exam_id = st.number_input("Enter Exam ID:", min_value=0, value=None)
 
     csv_string = ''
 
