@@ -4,7 +4,7 @@ import re
 
 url = 'https://dsdc.mgu.ac.in/exQpMgmt/index.php/public/ResultView_ctrl/'
 
-def scrape_and_write_to_csv(exam_id, start_prn, end_prn):
+def scrape(exam_id, start_prn, end_prn):
     data = []
     for prn in range(start_prn, end_prn + 1):
         payload = {'exam_id': str(exam_id), 'prn': str(prn), 'btnresult': 'Get Result'}
@@ -53,9 +53,11 @@ def scrape_and_write_to_csv(exam_id, start_prn, end_prn):
 
         data.append(student_row)
 
-                #header = []
-                #for row in result_array[:-1]:
-                 #   header = header + [row[0] + ' ISA', row[0] + ' ESA', row[0] + ' Total', row[0] + ' Grade']
-                #header = ['PRN', 'Name'] + header + ['SCPA', 'Total Mark', 'Grade']
+    header = []
+    for row in result_array[:-1]:
+        header = header + [row[0] + ' ISA', row[0] + ' ESA', row[0] + ' Total', row[0] + ' Grade']
+    header = ['PRN', 'Name'] + header + ['SCPA', 'Total Mark', 'Grade']
+
+    data.insert(0, header)
     
     return data
