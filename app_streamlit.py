@@ -1,6 +1,4 @@
 import streamlit as st
-import tempfile
-import os
 from scraper import scrape_and_write_to_csv
 
 def main():
@@ -11,14 +9,13 @@ def main():
     end_prn = st.number_input("Enter End PRN:", min_value=0)
     exam_id = st.number_input("Enter Exam ID:", min_value=0)
 
+    csv_string = ''
+
     if st.button("Run Scraping"):
-        # Create a temporary file
-        with tempfile.NamedTemporaryFile(delete=False, suffix=".csv") as temp_file:
-            csv_file_path = temp_file.name
-            scrape_and_write_to_csv(exam_id, start_prn, end_prn, csv_file_path)
+        data = scrape_and_write_to_csv(exam_id, start_prn, end_prn)
+        csv_string = '\n'.join([','.join(map(str, row)) for row in data])
         
-        # Provide a download link
-        st.markdown(f"[Download Output File](sandbox:/mnt/data/{os.path.basename(csv_file_path)})")
+    st.download_button('Download CSV', csv_string, 'text/csv')
 
 if __name__ == "__main__":
     main()

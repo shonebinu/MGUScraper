@@ -1,12 +1,11 @@
 from scrapy import Selector
 import requests
 import re
-import csv
-import os
 
 url = 'https://dsdc.mgu.ac.in/exQpMgmt/index.php/public/ResultView_ctrl/'
 
-def scrape_and_write_to_csv(exam_id, start_prn, end_prn, csv_file_path):
+def scrape_and_write_to_csv(exam_id, start_prn, end_prn):
+    data = []
     for prn in range(start_prn, end_prn + 1):
         payload = {'exam_id': str(exam_id), 'prn': str(prn), 'btnresult': 'Get Result'}
 
@@ -52,19 +51,11 @@ def scrape_and_write_to_csv(exam_id, start_prn, end_prn, csv_file_path):
 
         student_row = student_row + [scpa, overall[3] if overall[3] != '---' else 'Fail', overall[5] if overall[5] != '---' else 'Fail']
 
-        file_exists = os.path.exists(csv_file_path)
+        data.append(student_row)
 
-        with open(csv_file_path, 'a', newline='') as csv_file:
-            csv_writer = csv.writer(csv_file)
-
-            if not file_exists:
-                header = []
-                for row in result_array[:-1]:
-                    header = header + [row[0] + ' ISA', row[0] + ' ESA', row[0] + ' Total', row[0] + ' Grade']
-                header = ['PRN', 'Name'] + header + ['SCPA', 'Total Mark', 'Grade']
-                csv_writer.writerow(header)
-                print(','.join(header))
-
-            csv_writer.writerow(student_row)
-            print(','.join(student_row))
-
+                #header = []
+                #for row in result_array[:-1]:
+                 #   header = header + [row[0] + ' ISA', row[0] + ' ESA', row[0] + ' Total', row[0] + ' Grade']
+                #header = ['PRN', 'Name'] + header + ['SCPA', 'Total Mark', 'Grade']
+    
+    return data
