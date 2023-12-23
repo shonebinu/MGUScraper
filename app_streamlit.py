@@ -24,7 +24,8 @@ def main():
 
     # Display download button below the "Run Scraping" button
     if csv_string:
-        st.download_button('Download CSV', csv_string, 'text/csv')
+        filename = f'MGU_Scraper_Output_{exam_id}_{start_prn}_{end_prn}.csv'
+        st.download_button(label='Download CSV', data=csv_string, mime='text/csv', key='download_button', help="Click to download the CSV file", file_name=filename)
 
 if __name__ == "__main__":
     main()
