@@ -21,6 +21,10 @@ def main():
             data = scrape(exam_id, start_prn, end_prn)
             csv_string = '\n'.join([','.join(map(str, row)) for row in data])
 
+            if len(data) == 1:
+                st.error("Error: Did you enter the wrong register number or exam?")
+                return
+
         st.success("Scraping complete!")
 
     # Display download button below the "Run Scraping" button
