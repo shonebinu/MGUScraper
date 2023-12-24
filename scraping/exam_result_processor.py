@@ -34,7 +34,7 @@ def extract_result_array(mark_rows):
     return result_array
 
 def extract_scpa(match):
-    return str(float(match.group())) if match else 'Fail'
+    return str(float(match.group())) if match else '---'
 
 def scrape_results(url, exam_id, start_prn, end_prn):
     payload_template = {'exam_id': str(exam_id), 'prn': '', 'btnresult': 'Get Result'}
@@ -62,14 +62,14 @@ def scrape_results(url, exam_id, start_prn, end_prn):
         student_row = [current_prn, name]
 
         for row in result_array[:-1]:
-            student_row += [row[5], row[3], str(int(row[3]) + int(row[5])), row[9] if row[9] != '---' else 'Fail']
+            student_row += [row[5], row[3], str(int(row[3]) + int(row[5])), row[9]]
 
         overall = result_array[-1]
 
         match = re.search(r'\d+\.\d+|\d+', overall[2])
         scpa = extract_scpa(match)
 
-        student_row += [scpa, overall[3] if overall[3] != '---' else 'Fail', overall[5] if overall[5] != '---' else 'Fail']
+        student_row += [scpa, overall[3], overall[5]]
 
         data.append(student_row)
 
