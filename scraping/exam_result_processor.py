@@ -49,6 +49,8 @@ def scrape_results(url, exam_id, start_prn, end_prn):
 
         sel = Selector(text=html)
         garbage_rows = sel.xpath('//*[@class="frame"]').xpath('./table[2]//tr')
+        if not garbage_rows:
+            continue
 
         mark_rows = extract_mark_rows(garbage_rows)
         result_array = extract_result_array(mark_rows)

@@ -1,4 +1,5 @@
 import streamlit as st
+import pandas as pd
 from scraping.exam_result_processor import scrape_results
 from scraping.exam_data_fetcher import get_exam_names_and_ids
 
@@ -19,7 +20,7 @@ def main():
     selected_exam = st.selectbox("Select an exam", list(exams.keys()))
     exam_id = int(exams[selected_exam])
 
-    csv_string = ''
+    data = ''
 
     if st.button("Run Scraping"):
         with st.spinner("Scraping in progress..."):
@@ -29,8 +30,6 @@ def main():
                 st.error("Error: Failed to retrieve data. Please check your inputs.")
                 return
 
-            csv_string = '\n'.join([','.join(map(str, row)) for row in data])
-
             if len(data) <= 1:
                 st.error("Error: No data found. Check the entered register numbers or exam.")
                 return
@@ -38,16 +37,19 @@ def main():
         st.success("Scraping complete!")
 
     # Display download button below the "Run Scraping" button
-    if csv_string:
+    if data:
         filename = f'MGU_Scraper_Output_{exam_id}_{start_prn}_{end_prn}.csv'
         st.download_button(
             label='Download CSV',
-            data=csv_string,
+            data='\n'.join([','.join(map(str, row)) for row in data]),
             mime='text/csv',
             key='download_button',
             help="Click to download the CSV file",
             file_name=filename
         )
+
+        df = pd.DataFrame(data[1:], columns=data[0])
+        st.dataframe(df, hide_index=True)
 
 if __name__ == "__main__":
     main()
