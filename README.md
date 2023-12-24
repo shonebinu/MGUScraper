@@ -6,11 +6,17 @@ MGU Scraper is exclusively tailored to streamline the extraction of grade result
 
 ## Getting Started:
 Clone it: 
-```git clone https://github.com/shonebinu/MGUScraper.git && cd MGUScraper```
+```bash
+git clone https://github.com/shonebinu/MGUScraper.git && cd MGUScraper
+```
 Grab the tools: 
-```pip install -r requirements.txt```
+```bash
+pip install -r requirements.txt
+```
 Fire it up: 
-```streamlit run app_streamlit.py```
+```bash
+streamlit run app_streamlit.py
+```
 
 ### Website Access:
 Visit [MGUScraper](https://mguscraper.streamlit.app) for an alternative way to use MGU Scraper
