@@ -2,6 +2,8 @@
 
 MGU Scraper is exclusively tailored to streamline the extraction of grade results specific to MGU University. Geared towards teachers managing class grades within the MGU system, this tool generates results in a user-friendly CSV format, ensuring a hassle-free process for importation into your preferred spreadsheet program.
 
+![]("./Screenshot 2023-12-24 at 17-43-43 MGU Scraper.png")
+
 ## Features 
 - Effortless Grading: Punch in your start and end register numbers, choose the exam, hit a button, and ta-da - your CSV is ready.
 - Your Time, Your Way: Forget spending hours on data entry. Let's get you back to what you do best – teaching.
@@ -31,3 +33,5 @@ Feel free to adapt it to your liking!
 Note: The app is beta
 
 ## To-Do:
+
+## Tech used
