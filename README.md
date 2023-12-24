@@ -27,13 +27,5 @@ Visit [MGUScraper](https://mguscraper.streamlit.app) for an alternative way to u
 3. Hit 'Run Scraping' let MGUScraper handle the rest.
 4. Download the csv file.
 
-## License:
-GPL License. Sharing is caring, right?
-
-Feel free to adapt it to your liking!
-
-Note: The app is beta
-
 ## To-Do:
 
-## Tech used
