@@ -62,7 +62,7 @@ def scrape_results(url, exam_id, start_prn, end_prn):
         student_row = [current_prn, name]
 
         for row in result_array[:-1]:
-            student_row += [row[5], row[3], str(int(row[3]) + int(row[5])), row[9]]
+            student_row += [row[5], row[3], row[7], row[9]]
 
         overall = result_array[-1]
 
