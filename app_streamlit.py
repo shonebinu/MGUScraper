@@ -56,6 +56,7 @@ def main():
         #     help="Click to download the CSV file",
         #     file_name=filename
         # )
+        st.info("Hover over the table below to find the download button for CSV.")
 
         df = pd.DataFrame(data[1:], columns=data[0])
         st.dataframe(df, hide_index=True)
