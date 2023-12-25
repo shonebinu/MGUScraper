@@ -19,7 +19,8 @@ def main():
 
     selected_exam = st.selectbox("Select an exam", ["Select an option"] + list(exams.keys()))
 
-    data = ''
+    data = None
+    exam_id = None
 
     if st.button("Run Scraping"):
         if (selected_exam == 'Select an option'):
@@ -29,7 +30,8 @@ def main():
             st.warning("Enter valid numeric PRN's")
             return
         with st.spinner("Scraping in progress..."):
-            data = scrape_results(url, int(exams[selected_exam]), start_prn, end_prn)
+            exam_id = exams[selected_exam]
+            data = scrape_results(url, exam_id, start_prn, end_prn)
 
             if data is None:
                 st.error("Error: Failed to retrieve data. Please check your inputs.")
