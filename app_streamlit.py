@@ -11,20 +11,25 @@ def main():
     st.title("MGU Scraper")
 
     url = "https://dsdc.mgu.ac.in/exQpMgmt/index.php/public/ResultView_ctrl/"
-    
+
     exams = get_exam_names_and_ids(url)
 
     start_prn = st.number_input("Enter Start PRN:", min_value=0, value=None, key='start_prn')
     end_prn = st.number_input("Enter End PRN:", min_value=0, value=None, key='end_prn')
 
-    selected_exam = st.selectbox("Select an exam", list(exams.keys()))
-    exam_id = int(exams[selected_exam])
+    selected_exam = st.selectbox("Select an exam", ["Select an option"] + list(exams.keys()))
 
     data = ''
 
     if st.button("Run Scraping"):
+        if (selected_exam == 'Select an option'):
+            st.warning('Select an exam')
+            return
+        if (start_prn is None or end_prn is None):
+            st.warning("Enter valid numeric PRN's")
+            return
         with st.spinner("Scraping in progress..."):
-            data = scrape_results(url, exam_id, start_prn, end_prn)
+            data = scrape_results(url, int(exams[selected_exam]), start_prn, end_prn)
 
             if data is None:
                 st.error("Error: Failed to retrieve data. Please check your inputs.")
