@@ -30,6 +30,8 @@ def main():
             st.warning("Enter valid numeric PRN's")
             return
         with st.spinner("Scraping in progress..."):
+            if end_prn < start_prn: # swap the input prn's if end_prn is bigger
+                start_prn, end_prn = end_prn, start_prn
             exam_id = exams[selected_exam]
             data = scrape_results(url, exam_id, start_prn, end_prn)
 
