@@ -45,15 +45,17 @@ def main():
 
     # Display download button below the "Run Scraping" button
     if data:
-        filename = f'MGU_Scraper_Output_{exam_id}_{start_prn}_{end_prn}.csv'
-        st.download_button(
-            label='Download CSV',
-            data='\n'.join([','.join(map(str, row)) for row in data]),
-            mime='text/csv',
-            key='download_button',
-            help="Click to download the CSV file",
-            file_name=filename
-        )
+        
+        # dataframe already has a download button
+        # filename = f'MGU_Scraper_Output_{exam_id}_{start_prn}_{end_prn}.csv'
+        # st.download_button(
+        #     label='Download CSV',
+        #     data='\n'.join([','.join(map(str, row)) for row in data]),
+        #     mime='text/csv',
+        #     key='download_button',
+        #     help="Click to download the CSV file",
+        #     file_name=filename
+        # )
 
         df = pd.DataFrame(data[1:], columns=data[0])
         st.dataframe(df, hide_index=True)
