@@ -40,6 +40,7 @@ def scrape_results(url, exam_id, start_prn, end_prn):
     payload_template = {'exam_id': str(exam_id), 'prn': '', 'btnresult': 'Get Result'}
 
     data = []
+    result_array = []
     for prn in range(start_prn, end_prn + 1):
         payload = {**payload_template, 'prn': str(prn)}
 

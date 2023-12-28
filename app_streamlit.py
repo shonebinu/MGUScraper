@@ -12,56 +12,61 @@ def main():
 
     url = "https://dsdc.mgu.ac.in/exQpMgmt/index.php/public/ResultView_ctrl/"
 
-    exams = get_exam_names_and_ids(url)
+    semester_array = get_exam_names_and_ids(url)
 
-    start_prn = st.number_input("Enter Start PRN:", min_value=0, value=None, key='start_prn')
-    end_prn = st.number_input("Enter End PRN:", min_value=0, value=None, key='end_prn')
+    # Create a list of semester names
+    semesters = ["Select a semester"] + [f"Semester {i+1}" for i in range(len(semester_array))]
 
-    selected_exam = st.selectbox("Select an exam", ["Select an option"] + list(exams.keys()))
+    # Allow the user to select a semester
+    selected_semester = st.selectbox("Select a semester", semesters)
 
-    data = None
-    exam_id = None
+    # If a semester is selected, provide a list of exams for that semester
+    if selected_semester != "Select a semester":
+        selected_semester_index = semesters.index(selected_semester) - 1  # Subtract 1 to get the index in semester_array
+        selected_semester_data = semester_array[selected_semester_index]
 
-    if st.button("Run Scraping"):
-        if (selected_exam == 'Select an option'):
-            st.warning('Select an exam')
-            return
-        if (start_prn is None or end_prn is None):
-            st.warning("Enter valid numeric PRN's")
-            return
-        with st.spinner("Scraping in progress..."):
-            if end_prn < start_prn: # swap the input prn's if end_prn is bigger
-                start_prn, end_prn = end_prn, start_prn
-            exam_id = exams[selected_exam]
-            data = scrape_results(url, exam_id, start_prn, end_prn)
+        # Extract exam names from the selected semester's data
+        exam_names = list(selected_semester_data.keys())
 
-            if data is None:
-                st.error("Error: Failed to retrieve data. Please check your inputs.")
+        # Allow the user to select a specific exam
+        selected_exam = st.selectbox("Select an exam", ["Select an exam"] + exam_names)
+
+        start_prn = st.number_input("Enter Start PRN:", min_value=0, value=None, key='start_prn')
+        end_prn = st.number_input("Enter End PRN:", min_value=0, value=None, key='end_prn')
+
+        data = None
+        exam_id = None
+
+        if st.button("Run Scraping"):
+            if (selected_exam == 'Select an exam'):
+                st.warning('Select an exam')
                 return
-
-            if len(data) <= 1:
-                st.error("Error: No data found. Check the entered register numbers or exam.")
+            if (start_prn is None or end_prn is None):
+                st.warning("Enter valid numeric PRN's")
                 return
+            with st.spinner("Scraping in progress..."):
+                if end_prn < start_prn:  # swap the input prn's if end_prn is bigger
+                    start_prn, end_prn = end_prn, start_prn
+                exam_id = selected_semester_data[selected_exam]
+                data = scrape_results(url, exam_id, start_prn, end_prn)
 
-        st.success("Scraping complete!")
+                if data is None:
+                    st.error("Error: Failed to retrieve data. Please check your inputs.")
+                    return
 
-    # Display download button below the "Run Scraping" button
-    if data:
-        
-        # dataframe already has a download button
-        # filename = f'MGU_Scraper_Output_{exam_id}_{start_prn}_{end_prn}.csv'
-        # st.download_button(
-        #     label='Download CSV',
-        #     data='\n'.join([','.join(map(str, row)) for row in data]),
-        #     mime='text/csv',
-        #     key='download_button',
-        #     help="Click to download the CSV file",
-        #     file_name=filename
-        # )
-        st.info("Hover over the table below to find the download button for CSV.")
+                if len(data) <= 1:
+                    st.error("Error: No data found. Check the entered register numbers or exam.")
+                    return
 
-        df = pd.DataFrame(data[1:], columns=data[0])
-        st.dataframe(df, hide_index=True)
+            st.success("Scraping complete!")
+
+        # Display download button below the "Run Scraping" button
+        if data:
+            st.info("Hover over the table below to find the download button for CSV.")
+
+            df = pd.DataFrame(data[1:], columns=data[0])
+            st.dataframe(df, hide_index=True)
 
 if __name__ == "__main__":
     main()
+
