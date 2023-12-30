@@ -7,7 +7,7 @@ def main():
     """
     Streamlit app for MGU Scraper.
     """
-    st.set_page_config(page_title="MGU Scraper")
+    st.set_page_config(page_title="MGU Scraper", page_icon="./assets/favicon.ico")
     st.title("MGU Scraper")
 
     url = "https://dsdc.mgu.ac.in/exQpMgmt/index.php/public/ResultView_ctrl/"
