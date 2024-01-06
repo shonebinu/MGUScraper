@@ -16,9 +16,6 @@ Fire it up:
 streamlit run app_streamlit.py
 ```
 
-### Website Access:
-Visit [MGUScraper](https://mguscraper.streamlit.app) for an alternative way to use MGU Scraper
-
 ## How to Use:
 1. Plug in your start and end register numbers.
 2. Choose the exam.
