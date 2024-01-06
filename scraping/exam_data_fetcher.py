@@ -1,15 +1,20 @@
 from scrapy import Selector
 import requests
 
-def get_exam_names_and_ids(url):
+def get_exam_names_and_ids(category):
     try:
+        semesters = ["FIRST SEMESTER", "SECOND SEMESTER", "THIRD SEMESTER",
+                     "FOURTH SEMESTER"]
+        if category == "PG":
+           url = "https://dsdc.mgu.ac.in/exQpMgmt/index.php/public/PGResultViewSec_ctrl/" 
+        else:
+            url = "https://dsdc.mgu.ac.in/exQpMgmt/index.php/public/ResultView_ctrl/"
+            semesters = semesters + ["FIFTH SEMESTER", "SIXTH SEMESTER"]
+
         html = requests.get(url).content
         sel = Selector(text=html)
 
         options = sel.xpath('//*[@id="exam_id"]/option')[1:]
-
-        semesters = ["FIRST SEMESTER", "SECOND SEMESTER", "THIRD SEMESTER",
-                     "FOURTH SEMESTER", "FIFTH SEMESTER", "SIXTH SEMESTER"]
 
         semester_array = []
 
@@ -35,4 +40,3 @@ def get_exam_names_and_ids(url):
     except requests.RequestException as e:
         print(f"Error fetching data from {url}: {e}")
         return []
-

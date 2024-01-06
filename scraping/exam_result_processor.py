@@ -36,7 +36,8 @@ def extract_result_array(mark_rows):
 def extract_scpa(match):
     return str(float(match.group())) if match else '---'
 
-def scrape_results(url, exam_id, start_prn, end_prn):
+def scrape_results(exam_id, start_prn, end_prn):
+    url = "https://dsdc.mgu.ac.in/exQpMgmt/index.php/public/ResultView_ctrl/"
     payload_template = {'exam_id': str(exam_id), 'prn': '', 'btnresult': 'Get Result'}
 
     data = []
@@ -82,3 +83,48 @@ def scrape_results(url, exam_id, start_prn, end_prn):
     data.insert(0, header)
 
     return data
+
+# PG
+
+def scrape_results_pg(exam_id, s_prn, e_prn):
+    url = "https://dsdc.mgu.ac.in/exQpMgmt/index.php/public/PGResultViewSec_ctrl/" 
+    students_marks = []
+    for_head = None
+    for prn in range(s_prn, e_prn+1):
+        data = {
+            'exam_id': str(exam_id),
+            'prn': str(prn),
+            'btnresult': 'Get Result',
+        }
+        html = requests.post(url, data=data).content
+        sel = Selector(text=html)
+        garbage_rows = sel.xpath("//*[@class='bord_rslt']/parent::*")
+        if not garbage_rows:
+            continue
+        result_array = []
+        name = sel.xpath('//*[@class="frame"]/table//table//tr[2]/td[3]/text()').extract_first()
+        student_row = [str(prn), name]
+
+        for row in garbage_rows[2:-1]:
+            inner_array = []
+            for td_element in row.xpath('.//td'):
+                inner_array.append(td_element.xpath('normalize-space()').extract_first())
+            result_array.append(inner_array)
+            if not for_head:
+                for_head = result_array 
+
+        for row in result_array:
+            student_row += [row[2], row[3], row[4], row[5], row[6], row[7]]
+
+        overall_gpa = garbage_rows[-1].xpath('./td[7]//text()').extract_first()
+        overall_grade = garbage_rows[-1].xpath('./td[8]//text()').extract_first()
+        student_row += [overall_gpa, overall_grade]
+        students_marks.append(student_row)
+
+    header = ["PRN", "Name"]
+    for row in for_head:
+        header += [row[0] + " Theory INT", row[0] + " Theory EXT", row[0] + " Practical INT", row[0] + " Practical EXT", row[0] + " GPA", row[0] + " Grade"]
+
+    students_marks = [header + ["Overall GPA"] + ["Overall Grade"]] + students_marks
+
+    return students_marks
