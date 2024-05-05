@@ -1,4 +1,4 @@
- MGU Scraper
+# MGU Scraper
 MGU Scraper is a specialized tool designed to streamline the extraction of students exam results.
 
 The app itself shows the result in a table format with options to sort and download the data as a csv file, that can be uploaded to other spreadsheet programs for further analysis.
