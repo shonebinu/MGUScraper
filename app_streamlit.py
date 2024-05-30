@@ -65,9 +65,13 @@ def main():
                         start_prn, end_prn = end_prn, start_prn
                     exam_id = selected_semester_data[selected_exam]
                     if selected_category == "UG":
-                        data = scrape_results(exam_id, start_prn, end_prn)
+                        data = scrape_results(
+                            exam_id, start_prn, end_prn, selected_semester
+                        )
                     elif selected_category == "PG":
-                        data = scrape_results_pg(exam_id, start_prn, end_prn)
+                        data = scrape_results_pg(
+                            exam_id, start_prn, end_prn, selected_semester
+                        )
 
                     if data is None:
                         st.error(
@@ -75,22 +79,27 @@ def main():
                         )
                         return
 
-                    if len(data) <= 1:
-                        st.error(
-                            "Error: No data found. Check the entered register numbers or exam."
-                        )
-                        return
-
                 st.success("Scraping complete!")
 
-            # Display download button below the "Run Scraping" button
             if data:
                 st.info(
                     "Hover over the table below to find the download button for CSV."
                 )
 
-                df = pd.DataFrame(data[1:], columns=data[0])
+                st.caption(selected_semester + " Result for the given range of PRN")
+                df = pd.DataFrame(data["sem_result"][1:], columns=data["sem_result"][0])
                 st.dataframe(df, hide_index=True)
+
+                if selected_semester == "Semester 6" and selected_category == "UG":
+                    st.caption("Final Result")
+                    df_add = pd.DataFrame(
+                        data["final_result"][1:], columns=data["final_result"][0]
+                    )
+                    st.dataframe(df_add, hide_index=True)
+
+                    st.info(
+                        "Students with past failed papers may get 'None' as their data."
+                    )
 
 
 if __name__ == "__main__":
