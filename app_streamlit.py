@@ -90,6 +90,22 @@ def main():
                 df = pd.DataFrame(data["sem_result"][1:], columns=data["sem_result"][0])
                 st.dataframe(df, hide_index=True)
 
+                if selected_category == "UG":
+                    grades = df.iloc[:, -1].values
+
+                    grade_counts = {}
+
+                    for grade in grades:
+                        if grade == "---":
+                            grade = "Fail"
+
+                        if grade in grade_counts:
+                            grade_counts[grade] += 1
+                        else:
+                            grade_counts[grade] = 1
+
+                    st.bar_chart(grade_counts)
+
                 if selected_semester == "Semester 6" and selected_category == "UG":
                     st.caption("Final Result")
                     df_add = pd.DataFrame(
