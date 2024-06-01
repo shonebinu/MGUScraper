@@ -4,11 +4,13 @@ from bs4 import BeautifulSoup
 
 
 def get_html_data(url, exam_id, prn):
+    """Fetch HTML data from the specified URL using given exam ID and PRN."""
     payload = {"exam_id": exam_id, "prn": prn, "btnresult": "Get Result"}
     return requests.post(url, data=payload).content
 
 
 def get_student_details(student_details_table):
+    """Extract student personal details from the HTML table."""
     prn = student_details_table.select(
         "td:-soup-contains('Permanent Register Number:') + td + td"
     )[0].get_text(strip=True)
@@ -29,16 +31,14 @@ def get_student_details(student_details_table):
 
 
 def get_student_sem_overall_result(overall_html):
+    """Extract overall student semester result details from the HTML."""
     total_credit = overall_html.select("td:nth-child(2)")[0].get_text(strip=True)
     scpa_string = overall_html.select("td:-soup-contains('SCPA')")[0].get_text(
         strip=True
     )
     scpa_num = re.findall(r"\d+\.\d+", scpa_string)
 
-    if scpa_num:
-        scpa = scpa_num[0]
-    else:
-        scpa = "---"
+    scpa = scpa_num[0] if scpa_num else "---"
 
     total_marks = overall_html.select("td:-soup-contains('SCPA') + td")[0].get_text(
         strip=True
@@ -64,6 +64,7 @@ def get_student_sem_overall_result(overall_html):
 
 
 def get_student_subjects_results(sem_subject_rows):
+    """Extract individual subject results from the HTML rows."""
     subjects_data = []
 
     for tr in sem_subject_rows:
@@ -91,6 +92,7 @@ def get_student_subjects_results(sem_subject_rows):
 
 
 def get_student_sem_result(html):
+    """Parse HTML and extract student semester results."""
     soup = BeautifulSoup(html, "html.parser")
 
     if not soup.select(".frame"):
