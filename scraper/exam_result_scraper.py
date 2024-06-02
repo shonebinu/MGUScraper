@@ -1,5 +1,6 @@
 import requests
 import re
+import json
 from bs4 import BeautifulSoup
 
 
@@ -30,7 +31,7 @@ def get_student_details(student_details_table):
     return {"prn": prn, "name": name, "program": program, "exam_centre": exam_centre}
 
 
-def get_student_sem_overall_result(overall_html):
+def get_student_curr_sem_overall_result(overall_html):
     """Extract overall student semester result details from the HTML."""
     total_credit = overall_html.select("td:nth-child(2)")[0].get_text(strip=True)
     scpa_string = overall_html.select("td:-soup-contains('SCPA')")[0].get_text(
@@ -91,8 +92,45 @@ def get_student_subjects_results(sem_subject_rows):
     return subjects_data
 
 
-def get_student_sem_result(html):
-    """Parse HTML and extract student semester results."""
+def get_student_sem_wise_results(html_table):
+    sem_result_rows = html_table.select("tr")[1:]
+    sem_wise_results = []
+
+    for tr in sem_result_rows:
+        sem_result = {}
+
+        tds = tr.select("td")
+
+        sem_result["sem"] = tds[0].get_text(strip=True)
+        sem_result["credit"] = tds[1].get_text(strip=True)
+        sem_result["scpa"] = tds[2].get_text(strip=True)
+        sem_result["grade"] = tds[3].get_text(strip=True)
+        sem_result["result"] = tds[4].get_text(strip=True)
+        sem_result["pass_time"] = tds[5].get_text(strip=True)
+
+        sem_wise_results.append(sem_result)
+
+    return sem_wise_results
+
+
+def get_final_result(table_html):
+    final_result = {}
+
+    tds = table_html.select("tr")[-1].select("td")
+
+    final_result["marks_awarded"] = tds[0].get_text(strip=True)
+    final_result["max_marks"] = tds[1].get_text(strip=True)
+    final_result["ccpa"] = tds[2].get_text(strip=True)
+    final_result["total_credit_point"] = tds[3].get_text(strip=True)
+    final_result["programme_credit"] = tds[4].get_text(strip=True)
+    final_result["grade"] = tds[5].get_text(strip=True)
+    final_result["result"] = tds[6].get_text(strip=True)
+
+    return final_result
+
+
+def get_student_result(html):
+    """Parse HTML and extract student semester results and final result if exists."""
     soup = BeautifulSoup(html, "html.parser")
 
     if not soup.select(".frame"):
@@ -107,30 +145,48 @@ def get_student_sem_result(html):
     )
 
     student_details = get_student_details(student_details_table)
-    sem_overall_result = get_student_sem_overall_result(sem_overall_result_tr)
+    sem_overall_result = get_student_curr_sem_overall_result(sem_overall_result_tr)
     subjects_results = get_student_subjects_results(sem_subject_rows)
 
-    return {
+    student_result = {
         "personal_details": student_details,
-        "overall_result": sem_overall_result,
+        "overall_sem_result": sem_overall_result,
         "subjects_results": subjects_results,
     }
+
+    all_sem_results_table = soup.select(
+        "legend:-soup-contains('SEMESTER RESULTS') + table"
+    )
+
+    if all_sem_results_table:
+        sem_wise_results = get_student_sem_wise_results(all_sem_results_table[0])
+        student_result["sem_wise_result"] = sem_wise_results
+
+    final_result_table = soup.select(
+        "table[style='width:500px;']:-soup-contains('CCPA')"
+    )
+
+    if final_result_table:
+        final_result = get_final_result(final_result_table[0])
+        student_result["final_result"] = final_result
+
+    return student_result
 
 
 def main():
     # Sample data
     url_ug = "https://dsdc.mgu.ac.in/exQpMgmt/index.php/public/ResultView_ctrl/"
-    exam_id = "113"
-    start_prn = "220021082830"
-    end_prn = "220021082870"
+    exam_id = "124"
+    start_prn = "210021061395"
+    end_prn = "210021061395"
 
-    for prn in range(int(start_prn), int(end_prn)):
+    for prn in range(int(start_prn), int(end_prn) + 1):
 
         html_data = get_html_data(url_ug, exam_id, str(prn))
 
-        student_result = get_student_sem_result(html_data)
+        student_result = get_student_result(html_data)
 
-        print(student_result)
+        print(json.dumps(student_result))
 
 
 if __name__ == "__main__":
