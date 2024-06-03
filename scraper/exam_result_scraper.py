@@ -1,6 +1,5 @@
 import requests
 import re
-import json
 from bs4 import BeautifulSoup
 
 
@@ -93,6 +92,7 @@ def get_student_subjects_results(sem_subject_rows):
 
 
 def get_student_sem_wise_results(html_table):
+    """Extract semester-wise results from the HTML table."""
     sem_result_rows = html_table.select("tr")[1:]
     sem_wise_results = []
 
@@ -114,6 +114,7 @@ def get_student_sem_wise_results(html_table):
 
 
 def get_final_result(table_html):
+    """Extract the final result details from the HTML table."""
     final_result = {}
 
     tds = table_html.select("tr")[-1].select("td")
@@ -127,6 +128,27 @@ def get_final_result(table_html):
     final_result["result"] = tds[6].get_text(strip=True)
 
     return final_result
+
+
+def get_programme_part_result(trs):
+    """Extract programme part results from the HTML rows."""
+    programme_part_result = []
+
+    for tr in trs:
+        programme_part = {}
+
+        tds = tr.select("td")
+
+        programme_part["part"] = tds[0].get_text(strip=True)
+        programme_part["marks"] = tds[1].get_text(strip=True)
+        programme_part["max_marks"] = tds[2].get_text(strip=True)
+        programme_part["ccpa"] = tds[3].get_text(strip=True)
+        programme_part["credits"] = tds[4].get_text(strip=True)
+        programme_part["grade"] = tds[5].get_text(strip=True)
+
+        programme_part_result.append(programme_part)
+
+    return programme_part_result
 
 
 def get_student_result(html):
@@ -170,24 +192,24 @@ def get_student_result(html):
         final_result = get_final_result(final_result_table[0])
         student_result["final_result"] = final_result
 
+    programme_part_trs = soup.select(
+        "tr:-soup-contains('PROGRAMME PART RESULTS') ~ tr:has(>td[height='25'])"
+    )
+
+    if programme_part_trs:
+        program_part_result = get_programme_part_result(programme_part_trs)
+        student_result["programme_part_result"] = program_part_result
+
     return student_result
 
 
-def main():
-    # Sample data
-    url_ug = "https://dsdc.mgu.ac.in/exQpMgmt/index.php/public/ResultView_ctrl/"
-    exam_id = "124"
-    start_prn = "210021061395"
-    end_prn = "210021061395"
+def get_results(url, exam_id, start_prn, end_prn, pg=False):
+    results = []
 
     for prn in range(int(start_prn), int(end_prn) + 1):
-
-        html_data = get_html_data(url_ug, exam_id, str(prn))
-
+        html_data = get_html_data(url, exam_id, str(prn))
         student_result = get_student_result(html_data)
 
-        print(json.dumps(student_result))
+        results.append(student_result)
 
-
-if __name__ == "__main__":
-    main()
+    return results
