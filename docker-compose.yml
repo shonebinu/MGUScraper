@@ -2,7 +2,7 @@ services:
   mguscraper:
     image: python:slim-bookworm
     ports:
-      - 8051:8051
+      - 80:8051
     volumes:
       - ./src:/src
       - ./favicon.ico:/favicon.ico
