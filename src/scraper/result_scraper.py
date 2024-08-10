@@ -114,7 +114,7 @@ def get_student_sem_wise_results(html_table):
 
 
 def get_final_result(table_html):
-    """Extract the final result details from the HTML table."""
+    """Extract the all sem final result details from the HTML table."""
     final_result = {}
 
     tds = table_html.select("tr")[-1].select("td")
@@ -203,7 +203,7 @@ def get_student_result(html):
     return student_result
 
 
-def get_results(url, exam_id, start_prn, end_prn, pg=False):
+def get_results(url, exam_id, start_prn, end_prn):
     results = []
 
     for prn in range(int(start_prn), int(end_prn) + 1):
