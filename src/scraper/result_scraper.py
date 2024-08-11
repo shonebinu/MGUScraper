@@ -1,6 +1,7 @@
 import requests
 import re
 from bs4 import BeautifulSoup
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 
 def get_html_data(url, exam_id, prn):
@@ -203,13 +204,29 @@ def get_student_result(html):
     return student_result
 
 
-def get_results(url, exam_id, start_prn, end_prn):
+def get_results_for_prn(url, exam_id, prn):
+    """Fetch and parse results for a single PRN."""
+    html_data = get_html_data(url, exam_id, str(prn))
+    student_result = get_student_result(html_data)
+    return student_result
+
+
+def get_results(url, exam_id, start_prn, end_prn, max_threads=10):
     results = []
+    prn_range = range(int(start_prn), int(end_prn) + 1)
 
-    for prn in range(int(start_prn), int(end_prn) + 1):
-        html_data = get_html_data(url, exam_id, str(prn))
-        student_result = get_student_result(html_data)
+    with ThreadPoolExecutor(max_threads) as executor:
+        future_to_prn = {
+            executor.submit(get_results_for_prn, url, exam_id, prn): prn
+            for prn in prn_range
+        }
 
-        results.append(student_result)
+        for future in as_completed(future_to_prn):
+            prn = future_to_prn[future]
+            try:
+                result = future.result()
+                results.append(result)
+            except Exception as exc:
+                print(f"PRN {prn} generated an exception: {exc}")
 
     return results

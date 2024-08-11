@@ -93,17 +93,27 @@ def main():
 
                 st.success("Scraping complete!")
 
-                st.info(
-                    "Hover over the table below to find the download button for CSV file."
-                )
+                course_name = get_course_name(data)
+
+                if not course_name:
+                    st.warning(
+                        "No students exist for the given range of PRN, try with different inputs"
+                    )
+                    return
 
                 st.caption(
                     f"Semester {semesters.index(selected_semester) + 1}"
                     + " results for the given range of PRN"
                 )
 
-                extracted_data = extract_field(data)
-                st.dataframe(extracted_data)
+                st.info(
+                    "Hover over the table below to find the download button for CSV file."
+                )
+
+                st.write(f"**{course_name}**")
+
+                extracted_data = extract_major_fields(data, course_name)
+                st.dataframe(sorted(extracted_data, key=lambda x: int(x["PRN"])))
 
                 bar_chart_data = get_bar_chart_data(extracted_data)
 
@@ -117,14 +127,28 @@ def main():
                 )
 
 
-def extract_field(data):
+def get_course_name(data):
+    for d in data:
+        if d is not None:
+            return d["personal_details"]["program"]
+    return None
+
+
+def extract_major_fields(data, course_name):
     flattened_result = []
 
     for d in data:
         if d:
+            if course_name != d["personal_details"]["program"]:
+                st.warning(
+                    f"From PRN: {d['personal_details']['prn']}, it's a different course. This app is made to check the results in a course wise manner. So from the given PRN, start running the webapp again."
+                )
+                return flattened_result
+
             temp = {}
             temp["PRN"] = d["personal_details"]["prn"]
             temp["Name"] = d["personal_details"]["name"]
+            temp["Exam centre"] = d["personal_details"]["exam_centre"]
 
             for x in d["subjects_results"]:
                 course = x["course_code"]
