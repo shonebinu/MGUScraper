@@ -2,9 +2,9 @@ services:
   mguscraper:
     image: python:slim-bookworm
     ports:
-      - 80:8051
+      - 80:80
     volumes:
       - ./src:/src
       - ./favicon.ico:/favicon.ico
       - ./requirements.txt:/requirements.txt
-    command: sh -c "pip install --no-cache-dir -r requirements.txt && streamlit run /src/app.py"
+    command: sh -c "pip install --no-cache-dir -r requirements.txt && streamlit run /src/app.py --server.port 80"
