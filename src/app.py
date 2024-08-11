@@ -139,7 +139,7 @@ def extract_field(data):
 
 
 def get_bar_chart_data(data):
-    grades_order = ["S", "A+", "A", "B+", "B", "C+", "C", "D", "E", "Fail"]
+    grades_order = ["S", "A+", "A", "B+", "B", "C+", "C", "D", "Fail"]
     grade_count = {}
 
     for d in data:
