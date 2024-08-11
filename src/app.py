@@ -1,4 +1,5 @@
 import streamlit as st
+import altair as alt
 from scraper.result_scraper import get_results
 from scraper.metadata_scraper import get_exam_metadata
 
@@ -106,7 +107,10 @@ def main():
 
                 bar_chart_data = get_bar_chart_data(extracted_data)
 
-                st.bar_chart(bar_chart_data)
+                st.altair_chart(
+                    get_grade_distribution_chart_data(bar_chart_data),
+                    use_container_width=True,
+                )
 
                 st.info(
                     "Course end result for sixth sem and programme part result is under work"
@@ -139,7 +143,7 @@ def extract_field(data):
 
 
 def get_bar_chart_data(data):
-    grades_order = ["S", "A+", "A", "B+", "B", "C+", "C", "D", "Fail"]
+    grades_order = ["S", "A+", "A", "B+", "B", "C", "D", "Fail"]
     grade_count = {}
 
     for d in data:
@@ -150,7 +154,48 @@ def get_bar_chart_data(data):
         else:
             grade_count[student_grade] = 1
 
-    return dict(sorted(grade_count.items(), key=lambda x: grades_order.index(x[0])))
+    sorted_grade_count = dict(
+        sorted(grade_count.items(), key=lambda x: grades_order.index(x[0]))
+    )
+
+    return sorted_grade_count
+
+
+def get_grade_distribution_chart_data(bar_chart_data):
+    color_mapping = {
+        "S": "#d946ef",
+        "A+": "#2563eb",
+        "A": "#60a5fa",
+        "B+": "#059669",
+        "B": "#34d399",
+        "C": "#fde047",
+        "D": "#fca5a5",
+        "Fail": "#1f2937",
+    }
+
+    return (
+        alt.Chart(
+            alt.Data(
+                values=[
+                    {"Grade": grade, "Count": count}
+                    for grade, count in bar_chart_data.items()
+                ]
+            )
+        )
+        .mark_bar()
+        .encode(
+            x=alt.X("Grade:N", sort=list(bar_chart_data.keys())),
+            y="Count:Q",
+            color=alt.Color(
+                "Grade:N",
+                scale=alt.Scale(
+                    domain=list(color_mapping.keys()),
+                    range=list(color_mapping.values()),
+                ),
+            ),
+        )
+        .properties(title="Grade Distribution")
+    )
 
 
 if __name__ == "__main__":
