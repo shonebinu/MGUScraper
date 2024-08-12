@@ -225,8 +225,10 @@ def get_results(url, exam_id, start_prn, end_prn, max_threads=10):
             prn = future_to_prn[future]
             try:
                 result = future.result()
-                results.append(result)
+                if (result):
+                    results.append(result)
             except Exception as exc:
                 print(f"PRN {prn} generated an exception: {exc}")
 
+    results.sort(key=lambda x: int(x['personal_details']['prn']))
     return results

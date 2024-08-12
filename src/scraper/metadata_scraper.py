@@ -28,4 +28,12 @@ def get_exam_metadata(url, semesters):
 
     exam_options = soup.select("#exam_id option[value]")[1:]
 
-    return get_semester_wise_exam_metadata(exam_options, semesters)
+    semeseter_wise_exam_metadata = get_semester_wise_exam_metadata(exam_options, semesters)
+    
+    for sem in semeseter_wise_exam_metadata:
+        semeseter_wise_exam_metadata[sem].sort(  
+            key=lambda x: int(x["exam_name"].split()[-1]),
+            reverse=True,
+        )
+        
+    return semeseter_wise_exam_metadata

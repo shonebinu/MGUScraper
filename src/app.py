@@ -16,6 +16,8 @@ def main():
         "This webapp is made for scraping the UG results of MGU examinations. PG scraping hasn't been implemented yet."
     )
 
+    st.info("Course end result for sixth sem is under work" )
+
     semesters = [
         "FIRST SEMESTER",
         "SECOND SEMESTER",
@@ -39,22 +41,16 @@ def main():
             semesters,
         )[selected_semester]
 
-        sorted_selected_semester_exams = sorted(
-            selected_semester_exams,
-            key=lambda x: int(x["exam_name"].split()[-1]),
-            reverse=True,
-        )
-
         selected_exam_id = st.selectbox(
             "Select an exam",
-            [exam["exam_id"] for exam in sorted_selected_semester_exams],
+            [exam["exam_id"] for exam in selected_semester_exams],
             index=None,
             placeholder="Select an exam...",
             format_func=lambda exam_id: " ".join(
                 next(
                     (
                         exam["exam_name"]
-                        for exam in sorted_selected_semester_exams
+                        for exam in selected_semester_exams
                         if exam["exam_id"] == exam_id
                     )
                 ).split()[2:]
@@ -107,23 +103,19 @@ def main():
                 )
 
                 st.info(
-                    "Hover over the table below to find the download button for CSV file."
+                    "Hover over the table's to find the download button for CSV file."
                 )
 
                 st.write(f"**{course_name}**")
 
                 extracted_data = extract_major_fields(data, course_name)
-                st.dataframe(sorted(extracted_data, key=lambda x: int(x["PRN"])))
+                st.dataframe(extracted_data)
 
                 bar_chart_data = get_bar_chart_data(extracted_data)
 
                 st.altair_chart(
                     get_grade_distribution_chart_data(bar_chart_data),
                     use_container_width=True,
-                )
-
-                st.info(
-                    "Course end result for sixth sem and programme part result is under work"
                 )
 
 
@@ -178,11 +170,15 @@ def get_bar_chart_data(data):
         else:
             grade_count[student_grade] = 1
 
-    sorted_grade_count = dict(
-        sorted(grade_count.items(), key=lambda x: grades_order.index(x[0]))
-    )
+    # Convert the dictionary to a list of tuples and sort it in place
+    grade_count_items = list(grade_count.items())
+    grade_count_items.sort(key=lambda x: grades_order.index(x[0]))
+
+    # Convert the sorted list of tuples back to a dictionary
+    sorted_grade_count = dict(grade_count_items)
 
     return sorted_grade_count
+
 
 
 def get_grade_distribution_chart_data(bar_chart_data):
