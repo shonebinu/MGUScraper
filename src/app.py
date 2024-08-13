@@ -16,7 +16,7 @@ def main():
         "This webapp is made for scraping the UG results of MGU examinations. PG scraping hasn't been implemented yet."
     )
 
-    st.info("Course end result for sixth sem is under work" )
+    st.info("Course end result for sixth sem is under work")
 
     semesters = [
         "FIRST SEMESTER",
@@ -82,7 +82,9 @@ def main():
                 )
 
                 if not data:
-                    st.warning("Data doesn't exist for the given parameters. Please check the given inputs" )
+                    st.warning(
+                        "Data doesn't exist for the given parameters. Please check the given inputs"
+                    )
                     return
 
                 st.success("Scraping complete!")
@@ -96,24 +98,59 @@ def main():
                     "Hover over the table's to find the download button for CSV file."
                 )
 
-                extracted_data = extract_major_fields(data)
+                extracted_data, coursecode_to_coursename = extract_major_fields(data)
 
-                for program_wise_result in extracted_data:
-                    st.markdown(f"**{program_wise_result}**")
-                    display_results_table_and_charts(extracted_data[program_wise_result])
+                for program in extracted_data:
+                    display_results_table_and_charts(
+                        program,
+                        extracted_data[program],
+                        coursecode_to_coursename[program],
+                    )
 
 
-def display_results_table_and_charts(data):
-    st.dataframe(data)
-    bar_chart_data = get_bar_chart_data(data)
-    st.altair_chart(get_grade_distribution_chart_data(bar_chart_data), use_container_width=True)
+def display_results_table_and_charts(program_name, student_data, coursecode_to_name):
+    st.markdown(
+        f"###### <u>{program_name} ({len(student_data)} Entries)</u>",
+        unsafe_allow_html=True,
+    )
+    st.dataframe(student_data)
+
+    st.markdown(f"**Course Details**")
+    st.dataframe(coursecode_to_name)
+
+    bar_chart_data = get_bar_chart_data(student_data)
+    st.altair_chart(
+        get_grade_distribution_chart_data(bar_chart_data), use_container_width=True
+    )
+
 
 def extract_major_fields(data):
     program_wise_flattened_result = {}
+    coursecode_to_coursename_map = {}
 
     for d in data:
         if d:
             program = d["personal_details"]["program"]
+
+            if program not in coursecode_to_coursename_map:
+                coursecode_to_coursename_map[program] = []
+                for x in d["subjects_results"]:
+                    course_code = x["course_code"]
+                    course_name = x["course"]
+                    credit = x["credit"]
+                    max_external = x["max_ext"]
+                    max_internal = x["max_int"]
+                    max = x["max"]
+                    coursecode_to_coursename_map[program].append(
+                        {
+                            "Course Code": course_code,
+                            "Course Name": course_name,
+                            "Credit": credit,
+                            "Max Internal": max_internal,
+                            "Max External": max_external,
+                            "Max Marks": max,
+                        }
+                    )
 
             temp = {}
             temp["PRN"] = d["personal_details"]["prn"]
@@ -135,8 +172,33 @@ def extract_major_fields(data):
                 program_wise_flattened_result[program] = []
 
             program_wise_flattened_result[program].append(temp)
-            
-    return program_wise_flattened_result
+
+    for x in coursecode_to_coursename_map:
+        program_row = coursecode_to_coursename_map[x]
+
+        sum_credit = 0
+        sum_max_internal = 0
+        sum_max_external = 0
+        sum_max_marks = 0
+
+        for i in program_row:
+            sum_credit += int(i["Credit"])
+            sum_max_internal += int(i["Max Internal"])
+            sum_max_external += int(i["Max External"])
+            sum_max_marks += int(i["Max Marks"])
+
+        program_row.append(
+            {
+                "Course Code": "Total",
+                "Course Name": "",
+                "Credit": str(sum_credit),
+                "Max Internal": str(sum_max_internal),
+                "Max External": str(sum_max_external),
+                "Max Marks": str(sum_max_marks),
+            }
+        )
+
+    return (program_wise_flattened_result, coursecode_to_coursename_map)
 
 
 def get_bar_chart_data(data):
@@ -159,7 +221,6 @@ def get_bar_chart_data(data):
     sorted_grade_count = dict(grade_count_items)
 
     return sorted_grade_count
-
 
 
 def get_grade_distribution_chart_data(bar_chart_data):
