@@ -82,20 +82,10 @@ def main():
                 )
 
                 if not data:
-                    st.error(
-                        "Error: Failed to retrieve data. Please check the given inputs or it might be a problem from their end."
-                    )
+                    st.warning("Data doesn't exist for the given parameters. Please check the given inputs" )
                     return
 
                 st.success("Scraping complete!")
-
-                course_name = get_course_name(data)
-
-                if not course_name:
-                    st.warning(
-                        "No students exist for the given range of PRN, try with different inputs"
-                    )
-                    return
 
                 st.caption(
                     f"Semester {semesters.index(selected_semester) + 1}"
@@ -106,36 +96,24 @@ def main():
                     "Hover over the table's to find the download button for CSV file."
                 )
 
-                st.write(f"**{course_name}**")
+                extracted_data = extract_major_fields(data)
 
-                extracted_data = extract_major_fields(data, course_name)
-                st.dataframe(extracted_data)
-
-                bar_chart_data = get_bar_chart_data(extracted_data)
-
-                st.altair_chart(
-                    get_grade_distribution_chart_data(bar_chart_data),
-                    use_container_width=True,
-                )
+                for program_wise_result in extracted_data:
+                    st.markdown(f"**{program_wise_result}**")
+                    display_results_table_and_charts(extracted_data[program_wise_result])
 
 
-def get_course_name(data):
-    for d in data:
-        if d is not None:
-            return d["personal_details"]["program"]
-    return None
+def display_results_table_and_charts(data):
+    st.dataframe(data)
+    bar_chart_data = get_bar_chart_data(data)
+    st.altair_chart(get_grade_distribution_chart_data(bar_chart_data), use_container_width=True)
 
-
-def extract_major_fields(data, course_name):
-    flattened_result = []
+def extract_major_fields(data):
+    program_wise_flattened_result = {}
 
     for d in data:
         if d:
-            if course_name != d["personal_details"]["program"]:
-                st.warning(
-                    f"From PRN: {d['personal_details']['prn']}, it's a different course. This app is made to check the results in a course wise manner. So from the given PRN, start running the webapp again."
-                )
-                return flattened_result
+            program = d["personal_details"]["program"]
 
             temp = {}
             temp["PRN"] = d["personal_details"]["prn"]
@@ -153,9 +131,12 @@ def extract_major_fields(data, course_name):
             temp["Total Mark"] = d["overall_sem_result"]["total_marks"]
             temp["Grade"] = d["overall_sem_result"]["grade"]
 
-            flattened_result.append(temp)
+            if program not in program_wise_flattened_result:
+                program_wise_flattened_result[program] = []
 
-    return flattened_result
+            program_wise_flattened_result[program].append(temp)
+            
+    return program_wise_flattened_result
 
 
 def get_bar_chart_data(data):
