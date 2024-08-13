@@ -98,7 +98,8 @@ def main():
                     "Hover over the table's to find the download button for CSV file."
                 )
 
-                extracted_data, coursecode_to_coursename = extract_major_fields(data)
+                extracted_data = extract_program_wise_flattened_result(data)
+                coursecode_to_coursename = extract_coursecode_to_coursename_map(data)
 
                 for program in extracted_data:
                     display_results_table_and_charts(
@@ -108,24 +109,39 @@ def main():
                     )
 
 
-def display_results_table_and_charts(program_name, student_data, coursecode_to_name):
-    st.markdown(
-        f"###### <u>{program_name} ({len(student_data)} Entries)</u>",
-        unsafe_allow_html=True,
-    )
-    st.dataframe(student_data)
-
-    st.markdown(f"**Course Details**")
-    st.dataframe(coursecode_to_name)
-
-    bar_chart_data = get_bar_chart_data(student_data)
-    st.altair_chart(
-        get_grade_distribution_chart_data(bar_chart_data), use_container_width=True
-    )
-
-
-def extract_major_fields(data):
+def extract_program_wise_flattened_result(data):
     program_wise_flattened_result = {}
+
+    for d in data:
+        if d:
+            program = d["personal_details"]["program"]
+
+            temp = {
+                "PRN": d["personal_details"]["prn"],
+                "Name": d["personal_details"]["name"],
+                "Exam centre": d["personal_details"]["exam_centre"],
+            }
+
+            for x in d["subjects_results"]:
+                course = x["course_code"]
+                temp[f"{course} ISA"] = x["isa_int"]
+                temp[f"{course} ESA"] = x["esa_ext"]
+                temp[f"{course} Total"] = x["total"]
+                temp[f"{course} Grade"] = x["grade"]
+
+            temp["SCPA"] = d["overall_sem_result"]["scpa"]
+            temp["Total Mark"] = d["overall_sem_result"]["total_marks"]
+            temp["Grade"] = d["overall_sem_result"]["grade"]
+
+            if program not in program_wise_flattened_result:
+                program_wise_flattened_result[program] = []
+
+            program_wise_flattened_result[program].append(temp)
+
+    return program_wise_flattened_result
+
+
+def extract_coursecode_to_coursename_map(data):
     coursecode_to_coursename_map = {}
 
     for d in data:
@@ -152,40 +168,11 @@ def extract_major_fields(data):
                         }
                     )
 
-            temp = {}
-            temp["PRN"] = d["personal_details"]["prn"]
-            temp["Name"] = d["personal_details"]["name"]
-            temp["Exam centre"] = d["personal_details"]["exam_centre"]
-
-            for x in d["subjects_results"]:
-                course = x["course_code"]
-                temp[f"{course} ISA"] = x["isa_int"]
-                temp[f"{course} ESA"] = x["esa_ext"]
-                temp[f"{course} Total"] = x["total"]
-                temp[f"{course} Grade"] = x["grade"]
-
-            temp["SCPA"] = d["overall_sem_result"]["scpa"]
-            temp["Total Mark"] = d["overall_sem_result"]["total_marks"]
-            temp["Grade"] = d["overall_sem_result"]["grade"]
-
-            if program not in program_wise_flattened_result:
-                program_wise_flattened_result[program] = []
-
-            program_wise_flattened_result[program].append(temp)
-
-    for x in coursecode_to_coursename_map:
-        program_row = coursecode_to_coursename_map[x]
-
-        sum_credit = 0
-        sum_max_internal = 0
-        sum_max_external = 0
-        sum_max_marks = 0
-
-        for i in program_row:
-            sum_credit += int(i["Credit"])
-            sum_max_internal += int(i["Max Internal"])
-            sum_max_external += int(i["Max External"])
-            sum_max_marks += int(i["Max Marks"])
+    for program, program_row in coursecode_to_coursename_map.items():
+        sum_credit = sum(int(i["Credit"]) for i in program_row)
+        sum_max_internal = sum(int(i["Max Internal"]) for i in program_row)
+        sum_max_external = sum(int(i["Max External"]) for i in program_row)
+        sum_max_marks = sum(int(i["Max Marks"]) for i in program_row)
 
         program_row.append(
             {
@@ -198,7 +185,23 @@ def extract_major_fields(data):
             }
         )
 
-    return (program_wise_flattened_result, coursecode_to_coursename_map)
+    return coursecode_to_coursename_map
+
+
+def display_results_table_and_charts(program_name, student_data, coursecode_to_name):
+    st.markdown(
+        f"###### <u>{program_name} ({len(student_data)} Entries)</u>",
+        unsafe_allow_html=True,
+    )
+    st.dataframe(student_data)
+
+    st.markdown(f"**Course Details**")
+    st.dataframe(coursecode_to_name)
+
+    bar_chart_data = get_bar_chart_data(student_data)
+    st.altair_chart(
+        get_grade_distribution_chart_data(bar_chart_data), use_container_width=True
+    )
 
 
 def get_bar_chart_data(data):
