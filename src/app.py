@@ -5,7 +5,6 @@ from scraper.metadata_scraper import get_exam_metadata
 
 
 def main():
-    st.set_page_config(page_title="MGU Scraper", page_icon="../favicon.ico")
     st.title("MGU Scraper")
 
     st.info(
@@ -16,7 +15,7 @@ def main():
         "This webapp is made for scraping the UG results of MGU examinations. PG scraping hasn't been implemented yet."
     )
 
-    st.info("Course end result for sixth sem is under work")
+    st.info("Course end result for sixth sem is under work.")
 
     semesters = [
         "FIRST SEMESTER",
