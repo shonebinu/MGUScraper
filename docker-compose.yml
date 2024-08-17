@@ -7,4 +7,4 @@ services:
       - ./src:/src
       - ./favicon.ico:/favicon.ico
       - ./requirements.txt:/requirements.txt
-    command: sh -c "pip install --no-cache-dir -r requirements.txt && streamlit run /src/app.py --server.port 80"
+    command: sh -c "pip install --no-cache-dir -r requirements.txt && streamlit run /src/authenticate.py --server.port 80"
