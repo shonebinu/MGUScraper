@@ -3,30 +3,88 @@ import altair as alt
 from scraper.result_scraper import get_results
 from scraper.metadata_scraper import get_exam_metadata
 
+semesters = [
+    "FIRST SEMESTER",
+    "SECOND SEMESTER",
+    "THIRD SEMESTER",
+    "FOURTH SEMESTER",
+    "FIFTH SEMESTER",
+    "SIXTH SEMESTER",
+]
+
 
 def main():
-    st.title("MGU Scraper")
+    show_info()
 
+    selected_semester = select_semester(semesters)
+
+    if not selected_semester:
+        return
+
+    # TODO: Implement try catch
+    selected_exam_id = select_exam(
+        semester_exams=get_exam_metadata(
+            "https://dsdc.mgu.ac.in/exQpMgmt/index.php/public/ResultView_ctrl/",
+            semesters,
+        )[selected_semester]
+    )
+
+    start_prn, end_prn = select_prn_range()
+
+    if not st.button("Run Scraping"):
+        return
+
+    if not all([selected_exam_id, start_prn, end_prn]):
+        st.warning("Fill up all the required fields")
+        return
+
+    if end_prn < start_prn:
+        st.warning("Start PRN should be less than End PRN")
+        return
+
+    # Refactor from here for main
+    with st.spinner("Scraping in progress..."):
+        data = get_results(
+            "https://dsdc.mgu.ac.in/exQpMgmt/index.php/public/ResultView_ctrl/",
+            selected_exam_id,
+            start_prn,
+            end_prn,
+        )
+
+        if not data:
+            st.warning(
+                "Data doesn't exist for the given parameters. Please check the given inputs"
+            )
+            return
+
+        st.success("Scraping complete!")
+
+        st.caption(
+            f"Semester {semesters.index(selected_semester) + 1}"
+            + " results for the given range of PRN"
+        )
+
+        st.info("Hover over the table's to find the download button for CSV file.")
+
+        extracted_data, coursecode_to_coursename = extract_major_fields(data)
+
+        for program in extracted_data:
+            display_results_table_and_charts(
+                program,
+                extracted_data[program],
+                coursecode_to_coursename[program],
+            )
+
+
+def show_info():
+    st.title("MGU Scraper")
     st.info(
         "Note: The data provided by this app belongs to the respective university. Please ensure you have permission from the data owner before using this tool."
     )
 
-    st.info(
-        "This webapp is made for scraping the UG results of MGU examinations. PG scraping hasn't been implemented yet."
-    )
 
-    st.info("Course end result for sixth sem is under work.")
-
-    semesters = [
-        "FIRST SEMESTER",
-        "SECOND SEMESTER",
-        "THIRD SEMESTER",
-        "FOURTH SEMESTER",
-        "FIFTH SEMESTER",
-        "SIXTH SEMESTER",
-    ]
-
-    selected_semester = st.selectbox(
+def select_semester(semesters):
+    return st.selectbox(
         "Select a semester",
         semesters,
         index=None,
@@ -34,79 +92,36 @@ def main():
         format_func=lambda x: f"Semester {semesters.index(x) + 1}",
     )
 
-    if selected_semester:
-        selected_semester_exams = get_exam_metadata(
-            "https://dsdc.mgu.ac.in/exQpMgmt/index.php/public/ResultView_ctrl/",
-            semesters,
-        )[selected_semester]
 
-        selected_exam_id = st.selectbox(
-            "Select an exam",
-            [exam["exam_id"] for exam in selected_semester_exams],
-            index=None,
-            placeholder="Select an exam...",
-            format_func=lambda exam_id: " ".join(
-                next(
-                    (
-                        exam["exam_name"]
-                        for exam in selected_semester_exams
-                        if exam["exam_id"] == exam_id
-                    )
-                ).split()[2:]
-            ),
-        )
-
-        start_prn = st.number_input(
-            "Enter Start PRN", min_value=0, value=None, placeholder="Enter Start PRN..."
-        )
-        end_prn = st.number_input(
-            "Enter End PRN", min_value=0, value=None, placeholder="Enter End PRN..."
-        )
-
-        if st.button("Run Scraping"):
-            if not selected_exam_id or not start_prn or not end_prn:
-                st.warning("Fill up all the required fields")
-                return
-
-            if end_prn < start_prn:
-                st.warning("Start PRN should be less than End PRN")
-                return
-
-            with st.spinner("Scraping in progress..."):
-                data = get_results(
-                    "https://dsdc.mgu.ac.in/exQpMgmt/index.php/public/ResultView_ctrl/",
-                    selected_exam_id,
-                    start_prn,
-                    end_prn,
+def select_exam(semester_exams):
+    return st.selectbox(
+        "Select an exam",
+        [exam["exam_id"] for exam in semester_exams],
+        index=None,
+        placeholder="Select an exam...",
+        format_func=lambda exam_id: " ".join(
+            next(
+                (
+                    exam["exam_name"]
+                    for exam in semester_exams
+                    if exam["exam_id"] == exam_id
                 )
-
-                if not data:
-                    st.warning(
-                        "Data doesn't exist for the given parameters. Please check the given inputs"
-                    )
-                    return
-
-                st.success("Scraping complete!")
-
-                st.caption(
-                    f"Semester {semesters.index(selected_semester) + 1}"
-                    + " results for the given range of PRN"
-                )
-
-                st.info(
-                    "Hover over the table's to find the download button for CSV file."
-                )
-
-                extracted_data, coursecode_to_coursename = extract_major_fields(data)
-
-                for program in extracted_data:
-                    display_results_table_and_charts(
-                        program,
-                        extracted_data[program],
-                        coursecode_to_coursename[program],
-                    )
+            ).split()[2:]
+        ),
+    )
 
 
+def select_prn_range():
+    start_prn = st.number_input(
+        "Enter Start PRN", min_value=0, value=None, placeholder="Enter Start PRN..."
+    )
+    end_prn = st.number_input(
+        "Enter End PRN", min_value=0, value=None, placeholder="Enter End PRN..."
+    )
+    return start_prn, end_prn
+
+
+# Refactor from here
 def display_results_table_and_charts(program_name, student_data, coursecode_to_name):
     st.markdown(
         f"###### <u>{program_name} ({len(student_data)} Entries)</u>",
