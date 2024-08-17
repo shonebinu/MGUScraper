@@ -8,7 +8,7 @@ from app import main as app_main
 def main():
     st.set_page_config(page_title="MGU Scraper", page_icon="../favicon.ico")
 
-    with open("../config.yaml") as file:
+    with open("./config.yml") as file:
         config = yaml.load(file, Loader=SafeLoader)
 
     authenticator = stauth.Authenticate(
