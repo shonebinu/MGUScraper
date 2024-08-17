@@ -69,7 +69,7 @@ def main():
 
 def show_info():
     st.title("MGU Scraper")
-    st.info(
+    st.warning(
         "Note: The data provided by this app belongs to the respective university. Please ensure you have permission from the data owner before using this tool."
     )
 
@@ -119,7 +119,8 @@ def display_scraped_data(scraped_data, selected_semester):
         )
         return
 
-    display_scraped_data_header_info(selected_semester)
+    st.success("Scraping complete!")
+    st.info("Hover over the table's to find the download button for CSV file.")
 
     sem_results_categorized_on_program = extract_sem_results_categorized_on_program(
         scraped_data
@@ -134,15 +135,6 @@ def display_scraped_data(scraped_data, selected_semester):
             sem_results_categorized_on_program[program],
             course_details_categorized_on_program[program],
         )
-
-
-def display_scraped_data_header_info(selected_semester):
-    st.success("Scraping complete!")
-    st.caption(
-        f"Semester {SEMESTERS.index(selected_semester) + 1}"
-        + " results for the given range of PRN"
-    )
-    st.info("Hover over the table's to find the download button for CSV file.")
 
 
 def display_scraped_data_of_one_program(program, sem_studs_result, sem_courses_data):
