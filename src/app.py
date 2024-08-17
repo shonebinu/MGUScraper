@@ -24,13 +24,18 @@ def main():
     if not selected_semester:
         return
 
-    # TODO: Implement try catch
-    selected_exam_id = select_exam(
-        semester_exams=get_exam_metadata(
-            "https://dsdc.mgu.ac.in/exQpMgmt/index.php/public/ResultView_ctrl/",
-            SEMESTERS,
-        )[selected_semester]
-    )
+    try:
+        selected_exam_id = select_exam(
+            semester_exams=get_exam_metadata(
+                "https://dsdc.mgu.ac.in/exQpMgmt/index.php/public/ResultView_ctrl/",
+                SEMESTERS,
+            )[selected_semester]
+        )
+    except Exception:
+        st.info(
+            "Unable to fetch exam data at the moment. Please check the host's website or try again later."
+        )
+        return
 
     start_prn, end_prn = select_prn_range()
 
@@ -46,13 +51,18 @@ def main():
         return
 
     with st.spinner("Scraping in progress..."):
-        # TODO: Implement try catch
-        data = get_results(
-            "https://dsdc.mgu.ac.in/exQpMgmt/index.php/public/ResultView_ctrl/",
-            selected_exam_id,
-            start_prn,
-            end_prn,
-        )
+        try:
+            data = get_results(
+                "https://dsdc.mgu.ac.in/exQpMgmt/index.php/public/ResultView_ctrl/",
+                selected_exam_id,
+                start_prn,
+                end_prn,
+            )
+        except Exception:
+            st.info(
+                "Unable to retrieve results at the moment. Please check the host's website or your internet connection and try again."
+            )
+            return
 
         display_scraped_data(data, selected_semester)
 
