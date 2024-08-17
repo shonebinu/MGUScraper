@@ -1,3 +1,4 @@
+import streamlit as st
 import requests
 import re
 from bs4 import BeautifulSoup
@@ -212,23 +213,35 @@ def get_results_for_prn(url, exam_id, prn):
 
 
 def get_results(url, exam_id, start_prn, end_prn, max_threads=10):
-    results = []
     prn_range = range(int(start_prn), int(end_prn) + 1)
+    total_prns = len(prn_range)
+
+    progress_bar = st.progress(0, "**Scraping in Progress... 0**")
 
     with ThreadPoolExecutor(max_threads) as executor:
-        future_to_prn = {
+        futures = {
             executor.submit(get_results_for_prn, url, exam_id, prn): prn
             for prn in prn_range
         }
 
-        for future in as_completed(future_to_prn):
-            prn = future_to_prn[future]
+        results = []
+        for idx, future in enumerate(as_completed(futures), start=1):
+            prn = futures[future]
             try:
                 result = future.result()
-                if (result):
+                if result:
                     results.append(result)
-            except Exception as exc:
-                print(f"PRN {prn} generated an exception: {exc}")
 
-    results.sort(key=lambda x: int(x['personal_details']['prn']))
+                progress = idx / total_prns
+                progress_bar.progress(
+                    progress,
+                    f"**Scraping in Progress... {int(progress * 100)}%**",
+                )
+
+            except Exception as exc:
+                st.error(f"PRN {prn} generated an exception: {exc}")
+
+    progress_bar.progress(100, "**Scraping Complete**")
+
+    results.sort(key=lambda x: int(x["personal_details"]["prn"]))
     return results

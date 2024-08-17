@@ -50,21 +50,20 @@ def main():
         st.warning("Start PRN should be less than End PRN")
         return
 
-    with st.spinner("Scraping in progress..."):
-        try:
-            data = get_results(
-                "https://dsdc.mgu.ac.in/exQpMgmt/index.php/public/ResultView_ctrl/",
-                selected_exam_id,
-                start_prn,
-                end_prn,
-            )
-        except Exception:
-            st.info(
-                "Unable to retrieve results at the moment. Please check the host's website or your internet connection and try again."
-            )
-            return
+    try:
+        data = get_results(
+            "https://dsdc.mgu.ac.in/exQpMgmt/index.php/public/ResultView_ctrl/",
+            selected_exam_id,
+            start_prn,
+            end_prn,
+        )
+    except Exception:
+        st.info(
+            "Unable to retrieve results at the moment. Please check the host's website or your internet connection and try again."
+        )
+        return
 
-        display_scraped_data(data, selected_semester)
+    display_scraped_data(data, selected_semester)
 
 
 def show_info():
@@ -119,7 +118,6 @@ def display_scraped_data(scraped_data, selected_semester):
         )
         return
 
-    st.success("Scraping complete!")
     st.info("Hover over the table's to find the download button for CSV file.")
 
     sem_results_categorized_on_program = extract_sem_results_categorized_on_program(
