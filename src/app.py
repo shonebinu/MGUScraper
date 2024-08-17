@@ -3,7 +3,7 @@ import altair as alt
 from scraper.result_scraper import get_results
 from scraper.metadata_scraper import get_exam_metadata
 
-semesters = [
+SEMESTERS = [
     "FIRST SEMESTER",
     "SECOND SEMESTER",
     "THIRD SEMESTER",
@@ -16,7 +16,7 @@ semesters = [
 def main():
     show_info()
 
-    selected_semester = select_semester(semesters)
+    selected_semester = select_semester(SEMESTERS)
 
     if not selected_semester:
         return
@@ -25,7 +25,7 @@ def main():
     selected_exam_id = select_exam(
         semester_exams=get_exam_metadata(
             "https://dsdc.mgu.ac.in/exQpMgmt/index.php/public/ResultView_ctrl/",
-            semesters,
+            SEMESTERS,
         )[selected_semester]
     )
 
@@ -42,8 +42,8 @@ def main():
         st.warning("Start PRN should be less than End PRN")
         return
 
-    # Refactor from here for main
     with st.spinner("Scraping in progress..."):
+        # TODO: Implement try catch
         data = get_results(
             "https://dsdc.mgu.ac.in/exQpMgmt/index.php/public/ResultView_ctrl/",
             selected_exam_id,
@@ -51,29 +51,7 @@ def main():
             end_prn,
         )
 
-        if not data:
-            st.warning(
-                "Data doesn't exist for the given parameters. Please check the given inputs"
-            )
-            return
-
-        st.success("Scraping complete!")
-
-        st.caption(
-            f"Semester {semesters.index(selected_semester) + 1}"
-            + " results for the given range of PRN"
-        )
-
-        st.info("Hover over the table's to find the download button for CSV file.")
-
-        extracted_data, coursecode_to_coursename = extract_major_fields(data)
-
-        for program in extracted_data:
-            display_results_table_and_charts(
-                program,
-                extracted_data[program],
-                coursecode_to_coursename[program],
-            )
+        display_scraped_data(data, selected_semester)
 
 
 def show_info():
@@ -83,13 +61,13 @@ def show_info():
     )
 
 
-def select_semester(semesters):
+def select_semester(SEMESTERS):
     return st.selectbox(
         "Select a semester",
-        semesters,
+        SEMESTERS,
         index=None,
         placeholder="Select a semester...",
-        format_func=lambda x: f"Semester {semesters.index(x) + 1}",
+        format_func=lambda x: f"Semester {SEMESTERS.index(x) + 1}",
     )
 
 
@@ -121,7 +99,35 @@ def select_prn_range():
     return start_prn, end_prn
 
 
-# Refactor from here
+def display_scraped_data(scraped_data, selected_semester):
+    if not scraped_data:
+        st.warning(
+            "Data doesn't exist for the given parameters. Please check the given inputs"
+        )
+        return
+
+    display_scraped_data_header_info(selected_semester)
+
+    # Refactor from here
+    extracted_data, coursecode_to_coursename = extract_major_fields(scraped_data)
+
+    for program in extracted_data:
+        display_results_table_and_charts(
+            program,
+            extracted_data[program],
+            coursecode_to_coursename[program],
+        )
+
+
+def display_scraped_data_header_info(selected_semester):
+    st.success("Scraping complete!")
+    st.caption(
+        f"Semester {SEMESTERS.index(selected_semester) + 1}"
+        + " results for the given range of PRN"
+    )
+    st.info("Hover over the table's to find the download button for CSV file.")
+
+
 def display_results_table_and_charts(program_name, student_data, coursecode_to_name):
     st.markdown(
         f"###### <u>{program_name} ({len(student_data)} Entries)</u>",
@@ -272,7 +278,3 @@ def get_grade_distribution_chart_data(bar_chart_data):
         )
         .properties(title="Grade Distribution")
     )
-
-
-if __name__ == "__main__":
-    main()
