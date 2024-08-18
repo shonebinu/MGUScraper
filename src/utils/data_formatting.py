@@ -24,6 +24,11 @@ def extract_sem_results_major_fields(stud_data):
 
     for sub_data in stud_data["subjects_results"]:
         course = sub_data["course_code"]
+        if "OPT" in course:
+            course = "Open Course"
+            major_fields["Open Course"] = (
+                f"{sub_data['course_code']}: {sub_data['course']}"
+            )
         major_fields[f"{course} ISA"] = sub_data["isa_int"]
         major_fields[f"{course} ESA"] = sub_data["esa_ext"]
         major_fields[f"{course} Total"] = sub_data["total"]
@@ -67,8 +72,8 @@ def extract_course_details(stud_data):
 
         course_details.append(
             {
-                "Course Code": course_code,
-                "Course Name": course_name,
+                "Course Code": "Open Course" if "OPT" in course_code else course_code,
+                "Course Name": "Open Course" if "OPT" in course_code else course_name,
                 "Credit": credit,
                 "Max Internal": max_internal,
                 "Max External": max_external,
