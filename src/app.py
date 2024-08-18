@@ -157,12 +157,14 @@ def display_scraped_data_of_one_program(program, sem_studs_result, sem_courses_d
 def get_grade_distribution_chart_data(bar_chart_data):
     color_mapping = {
         "S": "#d946ef",
+        "O": "#d946ef",
         "A+": "#2563eb",
         "A": "#60a5fa",
         "B+": "#059669",
         "B": "#34d399",
         "C": "#fde047",
         "D": "#fca5a5",
+        "P": "#fca5a5",
         "Fail": "#1f2937",
     }
 
@@ -185,6 +187,7 @@ def get_grade_distribution_chart_data(bar_chart_data):
                     domain=list(color_mapping.keys()),
                     range=list(color_mapping.values()),
                 ),
+                legend=None,
             ),
         )
         .properties(title="Grade Distribution")

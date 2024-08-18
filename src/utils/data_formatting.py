@@ -104,7 +104,7 @@ def calculate_courses_totals(course_details):
 
 def extract_bar_chart_data(data):
     """Get bar chart data on Grade(x) to Students(y)"""
-    grades_order = ["S", "A+", "A", "B+", "B", "C", "D", "Fail"]
+    grades_order = ["S", "O", "A+", "A", "B+", "B", "C", "D", "P", "Fail"]
     grade_count = {grade: 0 for grade in grades_order}
 
     for d in data:
