@@ -92,10 +92,10 @@ def calculate_courses_totals(course_details):
     total_max_external = 0
     total_max_marks = 0
     for course in course_details:
-        total_credit += int(course["Credit"])
-        total_max_internal += int(course["Max Internal"])
-        total_max_external += int(course["Max External"])
-        total_max_marks += int(course["Max Marks"])
+        total_credit += safe_int(course["Credit"])
+        total_max_internal += safe_int(course["Max Internal"])
+        total_max_external += safe_int(course["Max External"])
+        total_max_marks += safe_int(course["Max Marks"])
 
     return {
         "Course Code": "Total",
@@ -105,6 +105,13 @@ def calculate_courses_totals(course_details):
         "Max External": str(total_max_external),
         "Max Marks": str(total_max_marks),
     }
+
+
+def safe_int(value):
+    try:
+        return int(value)
+    except (TypeError, ValueError):
+        return 0
 
 
 def extract_bar_chart_data(data):
