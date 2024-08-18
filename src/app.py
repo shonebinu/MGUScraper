@@ -62,7 +62,7 @@ def main():
         )
     except Exception:
         st.info(
-            "Unable to retrieve results at the moment. Please check the host's website or your internet connection and try again."
+            "Unable to retrieve results at the moment. Please check the host's website or recheck your parameters again"
         )
         return
 
