@@ -22,21 +22,21 @@ def main():
 
     selected_semester = select_semester(SEMESTERS)
 
-    if not selected_semester:
-        return
-
     try:
-        selected_exam_id = select_exam(
-            semester_exams=get_exam_metadata(
-                "https://dsdc.mgu.ac.in/exQpMgmt/index.php/public/ResultView_ctrl/",
-                SEMESTERS,
-            )[selected_semester]
+        semester_exam_metadata = get_exam_metadata(
+            "https://dsdc.mgu.ac.in/exQpMgmt/index.php/public/ResultView_ctrl/",
+            SEMESTERS,
         )
     except Exception:
         st.info(
             "Unable to fetch exam data at the moment. Please check the host's website or try again later."
         )
         return
+
+    if not selected_semester:
+        return
+
+    selected_exam_id = select_exam(semester_exam_metadata[selected_semester])
 
     start_prn, end_prn = select_prn_range()
 
