@@ -1,14 +1,15 @@
 import streamlit as st
-import requests
+import aiohttp
+import asyncio
 import re
 from bs4 import BeautifulSoup
-from concurrent.futures import ThreadPoolExecutor, as_completed
 
 
-def get_html_data(url, exam_id, prn):
+async def fetch_html_data(session, url, exam_id, prn):
     """Fetch HTML data from the specified URL using given exam ID and PRN."""
     payload = {"exam_id": exam_id, "prn": prn, "btnresult": "Get Result"}
-    return requests.post(url, data=payload).content
+    async with session.post(url, data=payload) as response:
+        return await response.text()
 
 
 def get_student_details(student_details_table):
@@ -205,43 +206,43 @@ def get_student_result(html):
     return student_result
 
 
-def get_results_for_prn(url, exam_id, prn):
-    """Fetch and parse results for a single PRN."""
-    html_data = get_html_data(url, exam_id, str(prn))
-    student_result = get_student_result(html_data)
-    return student_result
+async def fetch_result_with_semaphore(session, url, exam_id, prn, semaphore):
+    """Fetch and parse results for a single PRN"""
+    async with semaphore:
+        html_data = await fetch_html_data(session, url, exam_id, str(prn))
+        student_result = get_student_result(html_data)
+        return student_result
 
 
-def get_results(url, exam_id, start_prn, end_prn, max_threads=10):
+async def get_results(url, exam_id, start_prn, end_prn, max_concurrency=10):
     prn_range = range(int(start_prn), int(end_prn) + 1)
     total_prns = len(prn_range)
+    progress_bar = st.progress(0, "**Scraping in Progress... 0%**")
 
-    progress_bar = st.progress(0, "**Scraping in Progress... 0**")
+    semaphore = asyncio.Semaphore(max_concurrency)
 
-    with ThreadPoolExecutor(max_threads) as executor:
-        futures = {
-            executor.submit(get_results_for_prn, url, exam_id, prn): prn
+    async with aiohttp.ClientSession() as session:
+        tasks = [
+            asyncio.ensure_future(
+                fetch_result_with_semaphore(session, url, exam_id, prn, semaphore)
+            )
             for prn in prn_range
-        }
+        ]
 
         results = []
-        for idx, future in enumerate(as_completed(futures), start=1):
-            prn = futures[future]
-            try:
-                result = future.result()
-                if result:
-                    results.append(result)
-
-                progress = idx / total_prns
-                progress_bar.progress(
-                    progress,
-                    f"**Scraping in Progress... {int(progress * 100)}%**",
-                )
-
-            except Exception as exc:
-                st.error(f"PRN {prn} generated an exception: {exc}")
-
-    progress_bar.progress(100, "**Scraping Complete**")
+        for idx, task in enumerate(asyncio.as_completed(tasks), start=1):
+            result = await task
+            if result:
+                results.append(result)
+            progress = idx / total_prns
+            progress_bar.progress(
+                progress,
+                (
+                    f"**Scraping in Progress... {int(progress * 100)}%**"
+                    if progress < 1
+                    else "**Scraping Complete**"
+                ),
+            )
 
     results.sort(key=lambda x: int(x["personal_details"]["prn"]))
     return results

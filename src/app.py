@@ -1,5 +1,6 @@
 import streamlit as st
 import altair as alt
+import asyncio
 from scraper.result_scraper import get_results
 from scraper.metadata_scraper import get_exam_metadata
 from utils.data_formatting import extract_sem_results_categorized_on_program
@@ -51,11 +52,13 @@ def main():
         return
 
     try:
-        data = get_results(
-            "https://dsdc.mgu.ac.in/exQpMgmt/index.php/public/ResultView_ctrl/",
-            selected_exam_id,
-            start_prn,
-            end_prn,
+        data = asyncio.run(
+            get_results(
+                "https://dsdc.mgu.ac.in/exQpMgmt/index.php/public/ResultView_ctrl/",
+                selected_exam_id,
+                start_prn,
+                end_prn,
+            )
         )
     except Exception:
         st.info(
