@@ -232,3 +232,7 @@ def display_programme_end_datas_of_one_program(final_result, semester_wise_resul
 
     st.markdown("**Semester Wise Results**")
     st.dataframe(semester_wise_results)
+
+
+if __name__ == "__main__":
+    main()
