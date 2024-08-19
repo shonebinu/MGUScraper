@@ -6,6 +6,9 @@ from scraper.metadata_scraper import get_exam_metadata
 from utils.data_formatting import extract_sem_results_categorized_on_program
 from utils.data_formatting import extract_courses_details_categorized_on_program
 from utils.data_formatting import extract_bar_chart_data
+from utils.data_formatting import extract_programme_end_final_result
+from utils.data_formatting import extract_programme_end_semester_results
+
 
 SEMESTERS = [
     "FIRST SEMESTER",
@@ -117,7 +120,7 @@ def select_prn_range():
 def display_scraped_data(scraped_data, selected_semester):
     if not scraped_data:
         st.warning(
-            "Data doesn't exist for the given parameters. Please check the given inputs"
+            "Data doesn't exist for the given parameters. Please check the given inputs",
         )
         return
 
@@ -137,12 +140,25 @@ def display_scraped_data(scraped_data, selected_semester):
             course_details_categorized_on_program[program],
         )
 
+        if selected_semester == SEMESTERS[-1]:
+            programme_end_final_result = extract_programme_end_final_result(
+                scraped_data
+            )
+            programme_end_semester_wise_result = extract_programme_end_semester_results(
+                scraped_data
+            )
+
+            display_programme_end_datas_of_one_program(
+                programme_end_final_result, programme_end_semester_wise_result
+            )
+
 
 def display_scraped_data_of_one_program(program, sem_studs_result, sem_courses_data):
     st.markdown(
-        f"###### <u>{program} ({len(sem_studs_result)} nos)</u>",
+        f"##### {program} ({len(sem_studs_result)} nos)",
         unsafe_allow_html=True,
     )
+    st.markdown("<u>**Semester Results**</u>", unsafe_allow_html=True)
     st.dataframe(sem_studs_result)
 
     st.markdown(f"**Course Details**")
@@ -192,3 +208,13 @@ def get_grade_distribution_chart_data(bar_chart_data):
         )
         .properties(title="Grade Distribution")
     )
+
+
+def display_programme_end_datas_of_one_program(final_result, semester_wise_results):
+    st.markdown("<u>**Programme End Final Results**</u>", unsafe_allow_html=True)
+    st.caption("Students with none in the field may have ongoing supplies")
+
+    st.dataframe(final_result)
+
+    st.markdown("**Semester Wise Results**")
+    st.dataframe(semester_wise_results)

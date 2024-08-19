@@ -96,7 +96,7 @@ def get_student_subjects_results(sem_subject_rows):
 
 def get_student_sem_wise_results(html_table):
     """Extract semester-wise results from the HTML table."""
-    sem_result_rows = html_table.select("tr")[1:]
+    sem_result_rows = html_table.select("tr")[2:]
     sem_wise_results = []
 
     for tr in sem_result_rows:

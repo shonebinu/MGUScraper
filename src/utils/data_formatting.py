@@ -126,3 +126,61 @@ def extract_bar_chart_data(data):
     return {
         grade: grade_count[grade] for grade in grades_order if grade_count[grade] > 0
     }
+
+
+def extract_programme_end_final_result(scraped_data):
+    """Extract programme end final result of the student"""
+    final_result = []
+    for stud in scraped_data:
+        if "final_result" not in stud:
+            final_result.append(
+                {
+                    "PRN": stud["personal_details"]["prn"],
+                    "Name": stud["personal_details"]["name"],
+                }
+            )
+            continue
+
+        row = stud["final_result"]
+        final_result.append(
+            {
+                "PRN": stud["personal_details"]["prn"],
+                "Name": stud["personal_details"]["prn"],
+                **{
+                    key.replace("_", " ").title() if key != "ccpa" else "CCPA": value
+                    for key, value in row.items()
+                },
+            }
+        )
+
+    return final_result
+
+
+def extract_programme_end_semester_results(scraped_data):
+    """Extract programme end semester wise results of the student"""
+    final_sem_wise_result = []
+    for stud in scraped_data:
+        if "sem_wise_result" not in stud:
+            final_sem_wise_result.append(
+                {
+                    "PRN": stud["personal_details"]["prn"],
+                    "Name": stud["personal_details"]["name"],
+                }
+            )
+            continue
+
+        sem_wise_result = stud["sem_wise_result"]
+        temp = {}
+        for i, sem in enumerate(sem_wise_result, start=1):
+            temp["PRN"] = stud["personal_details"]["prn"]
+            temp["Name"] = stud["personal_details"]["name"]
+
+            temp[f"SEM {i} Credit"] = sem["credit"]
+            temp[f"SEM {i} SCPA"] = sem["scpa"]
+            temp[f"SEM {i} Grade"] = sem["grade"]
+            temp[f"SEM {i} Result"] = sem["result"]
+            temp[f"SEM {i} Pass Time"] = sem["pass_time"]
+
+        final_sem_wise_result.append(temp)
+
+    return final_sem_wise_result
