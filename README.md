@@ -18,11 +18,6 @@ The objective of this tool is to help teachers assess their students' exam resul
 ## Getting Started:
 1. **Clone the Repository:**
    ```bash
-   git clone https://github.com/shonebinu/MGUScraper.git && cd MGUScraper
-
-## Getting Started:
-1. **Clone the Repository:**
-   ```bash
     git clone https://github.com/shonebinu/MGUScraper.git && cd MGUScraper
    ```
 2. **Install Required Dependencies:**
