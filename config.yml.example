@@ -1,6 +1,10 @@
 credentials:
   usernames:
-    email_or_username:
+    email_or_username1:
+      name: name_of_user
+      password: hashed_password
+
+    email_or_username2:
       name: name_of_user
       password: hashed_password
 cookie:
