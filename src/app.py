@@ -8,6 +8,7 @@ from utils.data_formatting import extract_courses_details_categorized_on_program
 from utils.data_formatting import extract_bar_chart_data
 from utils.data_formatting import extract_programme_end_final_result
 from utils.data_formatting import extract_programme_end_semester_results
+from utils.data_formatting import extract_programme_end_final_results_bar_chart_data
 
 
 SEMESTERS = [
@@ -68,6 +69,8 @@ def main():
             "Unable to retrieve results at the moment. Please check the host's website or recheck your parameters again"
         )
         return
+
+    st.markdown("")
 
     display_scraped_data(data, selected_semester)
 
@@ -135,6 +138,7 @@ def display_scraped_data(scraped_data, selected_semester):
 
     for program in sem_results_categorized_on_program:
         display_scraped_data_of_one_program(
+            selected_semester,
             program,
             sem_results_categorized_on_program[program],
             course_details_categorized_on_program[program],
@@ -153,21 +157,24 @@ def display_scraped_data(scraped_data, selected_semester):
             )
 
 
-def display_scraped_data_of_one_program(program, sem_studs_result, sem_courses_data):
+def display_scraped_data_of_one_program(
+    selected_semester, program, sem_studs_result, sem_courses_data
+):
+    st.markdown("")
     st.markdown(
-        f"##### {program} ({len(sem_studs_result)} nos)",
+        f"##### *{program} ({len(sem_studs_result)} nos)*",
         unsafe_allow_html=True,
     )
     st.markdown("<u>**Semester Results**</u>", unsafe_allow_html=True)
     st.dataframe(sem_studs_result)
 
-    st.markdown(f"**Course Details**")
-    st.dataframe(sem_courses_data)
-
     bar_chart_data = extract_bar_chart_data(sem_studs_result)
     st.altair_chart(
         get_grade_distribution_chart_data(bar_chart_data), use_container_width=True
     )
+
+    st.markdown(f"**{selected_semester} Course Details**")
+    st.dataframe(sem_courses_data)
 
 
 def get_grade_distribution_chart_data(bar_chart_data):
@@ -211,10 +218,17 @@ def get_grade_distribution_chart_data(bar_chart_data):
 
 
 def display_programme_end_datas_of_one_program(final_result, semester_wise_results):
+    st.markdown("---")
+
     st.markdown("<u>**Programme End Final Results**</u>", unsafe_allow_html=True)
     st.caption("Students with none in the field may have ongoing supplies")
 
     st.dataframe(final_result)
+    bar_chart_data = extract_programme_end_final_results_bar_chart_data(final_result)
+
+    st.altair_chart(
+        get_grade_distribution_chart_data(bar_chart_data), use_container_width=True
+    )
 
     st.markdown("**Semester Wise Results**")
     st.dataframe(semester_wise_results)

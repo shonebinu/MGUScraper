@@ -115,7 +115,7 @@ def safe_int(value):
 
 
 def extract_bar_chart_data(data):
-    """Get bar chart data on Grade(x) to Students(y)"""
+    """Get bar chart data on Grade(x) to Students(y) for semester result"""
     grades_order = ["S", "O", "A+", "A", "B+", "B", "C", "D", "P", "Fail"]
     grade_count = {grade: 0 for grade in grades_order}
 
@@ -145,7 +145,7 @@ def extract_programme_end_final_result(scraped_data):
         final_result.append(
             {
                 "PRN": stud["personal_details"]["prn"],
-                "Name": stud["personal_details"]["prn"],
+                "Name": stud["personal_details"]["name"],
                 **{
                     key.replace("_", " ").title() if key != "ccpa" else "CCPA": value
                     for key, value in row.items()
@@ -184,3 +184,17 @@ def extract_programme_end_semester_results(scraped_data):
         final_sem_wise_result.append(temp)
 
     return final_sem_wise_result
+
+
+def extract_programme_end_final_results_bar_chart_data(data):
+    """Get bar chart data on Grade(x) to Students(y) on programme end final result"""
+    grades_order = ["S", "O", "A+", "A", "B+", "B", "C", "D", "P", "Fail"]
+    grade_count = {grade: 0 for grade in grades_order}
+
+    for d in data:
+        student_grade = d["Grade"] if "Grade" in d else "Fail"
+        grade_count[student_grade] += 1
+
+    return {
+        grade: grade_count[grade] for grade in grades_order if grade_count[grade] > 0
+    }
