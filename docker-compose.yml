@@ -1,0 +1,11 @@
+services:
+  mguscraper:
+    image: python:slim-bookworm
+    ports:
+      - 80:80
+    volumes:
+      - ./src:/src
+      - ./config.yml:/config.yml
+      - ./favicon.ico:/favicon.ico
+      - ./requirements.txt:/requirements.txt
+    command: sh -c "pip install --no-cache-dir -r requirements.txt && streamlit run /src/authenticate.py --server.port 80"

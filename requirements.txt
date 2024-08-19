@@ -1,2 +1,4 @@
 streamlit
-scrapy
+streamlit-authenticator
+beautifulsoup4
+aiohttp
