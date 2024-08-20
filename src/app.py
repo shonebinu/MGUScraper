@@ -55,6 +55,10 @@ def main():
         st.warning("Start PRN should be less than End PRN")
         return
 
+    if end_prn - start_prn > 100000:
+        st.warning("The range between Start PRN and End PRN is too large")
+        return
+
     try:
         data = asyncio.run(
             get_results(
