@@ -165,9 +165,9 @@ def get_student_result(html):
 
     student_details_table = soup.select(".frame > table")[0]
     sem_overall_result_tr = sem_result_table.select("tr[height='30']")[0]
-    sem_subject_rows = sem_result_table.select(
-        "tr:nth-child(n+3):not(:nth-last-child(-n + 5))"
-    )
+    sem_subject_rows = sem_result_table.select("tr:nth-child(n+3)")[
+        : sem_result_table.select("tr:nth-child(n+3)").index(sem_overall_result_tr)
+    ]
 
     student_details = get_student_details(student_details_table)
     sem_overall_result = get_student_curr_sem_overall_result(sem_overall_result_tr)
