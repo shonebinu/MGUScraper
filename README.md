@@ -1,6 +1,8 @@
-# MGU Scraper: Automate Your Exam Result Analysis
+# MGU Scraper
 
-This document details MGU Scraper, a tool designed to simplify the process of extracting and analyzing student exam results from Mahatma Gandhi University (MGU).
+https://github.com/user-attachments/assets/7e53b2db-6ee8-41c2-adb3-5343a2f2375e
+
+MGU Scraper is a tool designed to simplify the process of extracting and analyzing student exam results from Mahatma Gandhi University (MGU).
 
 ### What It Does:
 - Fetches exam results from the MGU portal asynchronously.
@@ -55,4 +57,3 @@ This section outlines optional steps for deploying the app in a production envir
   
 ## License:
 MGU Scraper is licensed under the [GNU General Public License v3 (GPL-3)](LICENSE).
-
