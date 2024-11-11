@@ -16,25 +16,20 @@ def main():
         config["cookie"]["name"],
         config["cookie"]["key"],
         config["cookie"]["expiry_days"],
-        config["preauthorized"],
     )
 
-    name, authentication_status, username = authenticator.login(
-        fields={
-            "Form name": "Login",
-            "Username": "Email",
-            "Password": "Password",
-            "Login": "Login",
-        }
-    )
+    try:
+        authenticator.login()
+    except Exception as e:
+        st.error(e)
 
-    if authentication_status:
-        st.write(f"Welcome **{name}**")
+    if st.session_state["authentication_status"]:
         authenticator.logout()
+        st.write(f"Welcome **{st.session_state['name']}**")
         app_main()
-    elif authentication_status == False:
+    elif st.session_state["authentication_status"] is False:
         st.error("Email/password is incorrect")
-    elif authentication_status == None:
+    elif st.session_state["authentication_status"] is None:
         st.warning("Please enter your email and password")
 
 
