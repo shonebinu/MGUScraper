@@ -22,6 +22,8 @@ SEMESTERS = [
 
 
 def main():
+    st.set_page_config(page_title="MGU Scraper", page_icon="./favicon.png")
+
     show_info()
 
     selected_semester = select_semester(SEMESTERS)
