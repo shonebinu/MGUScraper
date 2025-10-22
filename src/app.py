@@ -22,7 +22,8 @@ SEMESTERS = [
 
 
 def main():
-    st.set_page_config(page_title="MGU Scraper", page_icon="./favicon.png")
+    st.set_page_config(page_title="MGU Scraper", page_icon="./logo.png")
+    st.logo("./logo.png")
 
     show_info()
 

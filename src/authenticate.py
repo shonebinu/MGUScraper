@@ -6,7 +6,8 @@ from app import main as app_main
 
 
 def main():
-    st.set_page_config(page_title="MGU Scraper", page_icon="./favicon.png")
+    st.set_page_config(page_title="MGU Scraper", page_icon="./logo.png")
+    st.logo("./logo.png")
 
     with open("./config.yml") as file:
         config = yaml.load(file, Loader=SafeLoader)
